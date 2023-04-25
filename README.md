@@ -8,4 +8,4 @@ It's built on top of RabbitMQ as a message broker and it's asynchronous by natur
 
 The architecture of MMFSTF is :
 
-![Architecture](https://raw.githubusercontent.com/ahmedbesbes/mmfstf/master/architecture.png)
+![Architecture](https://raw.githubusercontent.com/yynil/MMFSTF/master/Architecture.png)
