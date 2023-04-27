@@ -1,0 +1,9 @@
+{
+    "vhost":"mmfst_vhost",
+    "user":"mmfst_user",
+    "password":"39re02fjowfih3wf9",
+    "host":"192.168.1.65",
+    "port":5672,
+    "request_queue":"Request_Queue",
+    "response_queue":"Response_Queue"
+}
