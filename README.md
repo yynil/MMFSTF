@@ -9,3 +9,9 @@ It's built on top of RabbitMQ as a message broker and it's asynchronous by natur
 The architecture of MMFSTF is :
 
 ![Architecture](https://raw.githubusercontent.com/yynil/MMFSTF/master/Architecture.png)
+
+# Tasks
+
+. **Create a runnable asyncronous runtime based on RabbitMQ** : Done
+. **Create a langchain wrapper as a service** : TBD
+. **Add a context aware requests dispatcher** : This is the core of FSTs. The contexts in cache decides the next service to be called. TBD
