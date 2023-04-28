@@ -13,5 +13,7 @@ The architecture of MMFSTF is :
 # Tasks
 
 . **Create a runnable asyncronous runtime based on RabbitMQ** : Done
-. **Create a langchain wrapper as a service** : TBD
+
+. **Create a langchain wrapper as a service** : Done
+
 . **Add a context aware requests dispatcher** : This is the core of FSTs. The contexts in cache decides the next service to be called. TBD
