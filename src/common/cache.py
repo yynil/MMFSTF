@@ -12,7 +12,7 @@ def is_request_id_exists(rconn :redis.Redis,request_id :str) -> bool :
     #check if request_id exists in redis 
     return rconn.exists(request_id)
 
-def put_request_to_redis(rconn :redis.Redis,request :Request,ttl :int = 30) -> bool:
+def put_request_to_redis(rconn :redis.Redis,request :Request,ttl :int = 300) -> bool:
     #put the request to redis
     bs = request.serialize()
     #convert bytearray to bytes

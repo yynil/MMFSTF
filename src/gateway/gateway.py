@@ -83,7 +83,7 @@ async def conversation(request_id :str = None,data_type :str = 'TEXT',data :str 
         else:
             request.request_status = status
             request.contexts = request.contexts[:-1]
-            put_request_to_redis(redis_conn,request,ttl = 60*1)
+            put_request_to_redis(redis_conn,request,ttl = 60*10)
             LOGGER.info(f'current request {request} to redis')
     rbmq_conn.close()
     redis_conn.close()
