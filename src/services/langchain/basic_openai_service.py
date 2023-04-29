@@ -4,8 +4,7 @@ import logging
 
 from langchain import LLMChain, PromptTemplate
 from transformers import AutoTokenizer,AutoModelForCausalLM
-from transformers import pipeline
-from langchain.llms import HuggingFacePipeline
+from langchain.llms import OpenAI
 
 LOGGER_FORMAT = f'{__file__} %(asctime)s %(levelname)s %(message)s AT %(funcName)s'
 logging.basicConfig(format=LOGGER_FORMAT,level=logging.INFO)
@@ -58,22 +57,12 @@ if __name__ == '__main__':
     parser.add_argument('--service_queue_id', type=str, default=None, help='The Service Queue ID')
     parser.add_argument('--chain_name', type=str, default=None, help='The LLM Chain Name')
     parser.add_argument('--gather_all_contexts', action='store_true', help='Gather all contexts')
-    parser.add_argument('--model_path', type=str, help='The model path')
-    parser.add_argument('--trust_remote_code',action='store_true',help='Trust remote code')
-    parser.add_argument('--device',type=str,default='cpu',help='The device to run the model on')
 
     args = parser.parse_args()
 
-    if args.device.startswith('cuda'):
-        LOGGER.info('Load model to GPU in fp16')
-        model = AutoModelForCausalLM.from_pretrained(args.model_path,trust_remote_code=args.trust_remote_code).half().to(args.device)
-    else:
-        LOGGER.info(f'Load model to {args.device} ')
-        model = AutoModelForCausalLM.from_pretrained(args.model_path,trust_remote_code=args.trust_remote_code).to(args.device)
+    llm = OpenAI()
 
-    tokenizer = AutoTokenizer.from_pretrained(args.model_path,trust_remote_code=args.trust_remote_code)
-    p = pipeline('text-generation',model=model,tokenizer=tokenizer,device=args.device)
-    llm = HuggingFacePipeline(pipeline=p)
+
     template = """Translate the following Chinese to English: {chinese}
     Translation:"""
     prompt = PromptTemplate(template=template, input_variables=["chinese"])
