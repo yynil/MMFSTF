@@ -1,4 +1,4 @@
-import pika
+import json
 import argparse
 from common import get_rbmq_configuraion, get_rbmq_connection, pub_request_to_rbmq, pub_response_to_rbmq,ReconnectingAsyncConsumer,RequestMessageHandler,Request,get_redis_config,Context,ContextType,put_request_to_redis
 import logging
@@ -7,16 +7,9 @@ logging.basicConfig(format=LOGGER_FORMAT,level=logging.INFO)
 LOGGER = logging.getLogger(__file__)
 
 class BasicRequestDispatcherHandler(RequestMessageHandler):
-    def __init__(self, redis_config: dict, mq_config: dict) -> None:
+    def __init__(self, redis_config: dict, mq_config: dict,fst_config :dict) -> None:
         super().__init__(redis_config, mq_config)
-        self.fst_config = {
-            'CLIENT':{
-                'next':'FACT_CHECKER','queue':'fact_check_service'
-            },
-            'FACT_CHECKER':{
-                'next':'ANSWER','queue':'answer_service'
-            },
-        }
+        self.fst_config = fst_config
 
     def handle_request(self, request: Request) -> str:
         LOGGER.info(f'handle_request {request}')
@@ -44,14 +37,16 @@ class BasicRequestDispatcherHandler(RequestMessageHandler):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--mq_config', type=str, default='/tmp/mq.json', help='The configuration file for the message queue')
-    parser.add_argument('--redis_config', type=str, default='/tmp/redis.conf', help='The request id')
+    parser.add_argument('--mq_config', type=str, default='scripts/mq.json', help='The configuration file for the message queue')
+    parser.add_argument('--redis_config', type=str, default='scripts/redis.conf', help='The request id')
+    parser.add_argument('--fst_config', type=str, default='scripts/example_fst.json', help='The request id')
     args = parser.parse_args()
 
     mq_config = get_rbmq_configuraion(args.mq_config)
     redis_config = get_redis_config(args.redis_config)
+    fst_config = json.load(open(args.fst_config))
     amqp_url = f"amqp://{mq_config['user']}:{mq_config['password']}@{mq_config['host']}:{mq_config['port']}/{mq_config['vhost']}"
     print(f'amqp_url {amqp_url}')
-    dispatcher = BasicRequestDispatcherHandler(redis_config,mq_config)
+    dispatcher = BasicRequestDispatcherHandler(redis_config,mq_config,fst_config)
     consumer = ReconnectingAsyncConsumer(amqp_url,exchange='req_exch', queue=mq_config['request_queue'], message_handler=dispatcher)
     consumer.run()

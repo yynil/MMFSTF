@@ -5,7 +5,7 @@ from common import get_redis_config,get_redis_conn,put_request_to_redis,get_requ
     Request,Context,ContextType,get_rbmq_configuraion,get_rbmq_connection,pub_request_to_rbmq,del_request_from_redis
 import logging
 LOGGER_FORMAT = f'{__name__} %(asctime)s %(levelname)s %(message)s' 
-logging.basicConfig(format=LOGGER_FORMAT,level=logging.INFO)
+logging.basicConfig(format=LOGGER_FORMAT,level=logging.DEBUG)
 LOGGER = logging.getLogger(__name__)
 
 redis_conf = get_redis_config()
@@ -44,17 +44,21 @@ async def conversation(request_id :str = None,data_type :str = 'TEXT',data :str 
     if is_request_id_exists(redis_conn,request_id):
         #get the request from redis
         request = get_request_from_redis(redis_conn,request_id)
-        status = request.request_status
-        splitted_status = status.split('|')
-        current_status = splitted_status[0]
-        current_round = int(splitted_status[1])
-        if current_status == 'CLIENT':
-            redis_conn.close()
-            return {"message": "Please wait for response patiently", "request_id": request_id}
-        LOGGER.info(f'current_status {current_status},current_round {current_round}')
-        new_status = 'CLIENT|'+str(current_round+1)
-        LOGGER.info(f'new_status {new_status}')
-        request.request_status = new_status
+        contexts = request.contexts
+        if len(contexts) > 0:
+            last_context = contexts[-1]
+            status = request.request_status
+            splitted_status = status.split('|')
+            current_status = splitted_status[0]
+            current_round = int(splitted_status[1])
+            if current_status == 'CLIENT' or last_context.src != 'RESPONSE_HANDLER':
+                LOGGER.debug(f'current_status {current_status},last_context.src {last_context.src}, just ask client to wait patiently')
+                redis_conn.close()
+                return {"message": "Please wait for response patiently", "request_id": request_id}
+            LOGGER.info(f'current_status {current_status},current_round {current_round}')
+            new_status = 'CLIENT|'+str(current_round+1)
+            LOGGER.info(f'new_status {new_status}')
+            request.request_status = new_status
     else:
         #put the request to redis
         status = 'CLIENT|0'#status is to record current conversation status, format is 'status|current_conversation_round'

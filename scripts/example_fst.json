@@ -1,0 +1,8 @@
+{
+            "CLIENT":{
+                "next":"FACT_CHECKER","queue":"fact_check_service"
+            },
+            "FACT_CHECKER":{
+                "next":"ANSWER","queue":"answer_service"
+            }
+}
